@@ -277,7 +277,7 @@ def add_stat_annotation(ax, plot='boxplot',
                         use_fixed_offset=False, line_offset_to_box=None,
                         line_offset=None, line_height=0.02, text_offset=1,
                         color='0.2', linewidth=1.5,
-                        fontsize='medium', verbose=1):
+                        fontsize='medium', verbose=1, hide_unsignificant = False):
     """
     Optionally computes statistical test between pairs of data series, and add statistical annotation on top
     of the boxes/bars. The same exact arguments `data`, `x`, `y`, `hue`, `order`, `width`,
@@ -540,6 +540,12 @@ def add_stat_annotation(ax, plot='boxplot',
 
         result.box1 = box1
         result.box2 = box2
+    ##------------------------------------------------------
+    ## ------------if the result is not statistically significant--------------
+        if hide_unsignificant and result.pval > 0.05:
+            print(result.box1, 'and',result.box2, "Didn't show significance:",  np.round(result.pval,3))
+            continue
+
         test_result_list.append(result)
 
         if verbose >= 1:
@@ -552,9 +558,9 @@ def add_stat_annotation(ax, plot='boxplot',
                 text = "{} p = {}".format('{}', pvalue_format_string).format(result.test_short_name, result.pval)
             elif text_format is None:
                 text = None
-            elif text_format is 'star':
+            elif text_format == 'star':
                 text = pval_annotation_text(result.pval, pvalue_thresholds)
-            elif text_format is 'simple':
+            elif text_format == 'simple':
                 test_short_name = show_test_name and test_short_name or ""
                 text = simple_text(result.pval, simple_format_string, pvalue_thresholds, test_short_name)
 
@@ -624,10 +630,14 @@ def add_stat_annotation(ax, plot='boxplot',
         # Increment the counter of annotations in the y_stack array
         y_stack_arr[2, xi1:xi2 + 1] = y_stack_arr[2, xi1:xi2 + 1] + 1
 
-    y_stack_max = max(ymaxs)
-    if loc == 'inside':
-        ax.set_ylim((ylim[0], max(1.03*y_stack_max, ylim[1])))
-    elif loc == 'outside':
-        ax.set_ylim((ylim[0], ylim[1]))
+    if(len(ymaxs) == 0):
+        # print("No significant differences found")
+        pass
+    else:
+        y_stack_max = max(ymaxs)
+        if loc == 'inside':
+            ax.set_ylim((ylim[0], max(1.03*y_stack_max, ylim[1])))
+        elif loc == 'outside':
+            ax.set_ylim((ylim[0], ylim[1]))
 
     return ax, test_result_list
