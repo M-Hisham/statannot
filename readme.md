@@ -54,7 +54,7 @@ ax = sns.boxplot(data=df, x=x, y=y, order=order)
 test_results = add_stat_annotation(ax, data=df, x=x, y=y, order=order,
                                    box_pairs=[("Thur", "Fri"), ("Thur", "Sat"), ("Fri", "Sun")],
                                    test='Mann-Whitney', text_format='star',
-                                   loc='outside', verbose=2)
+                                   loc='outside', verbose=2,hide_unsignificant = True)
 test_results
 ```
 
